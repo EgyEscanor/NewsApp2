@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:title="@string/settings_menu_item">
 
@@ -11,7 +12,7 @@
 		android:title="@string/order_by" />
 
 	<ListPreference
-		android:defaultValue=""
+		android:defaultValue="@string/default_section_value"
 		app:entries="@array/categories"
 		android:entryValues="@array/categories_value"
 		android:key="@string/section_key"

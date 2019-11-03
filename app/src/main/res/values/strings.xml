@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name">News App</string>
+	<string name="app_name">News</string>
 	<string name="order_by_key">order_by</string>
 	<string name="section_key">section</string>
 	<string name="default_order_value">newest</string>
@@ -9,6 +9,9 @@
 
 	<string name="order_by">Order By</string>
 	<string name="category_title">Choose Category</string>
+	<string name="default_section_value"> </string>
+	<string name="settings">settings</string>
+
 
 
 	<array name="preferences_options">

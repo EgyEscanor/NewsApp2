@@ -152,10 +152,8 @@ public class QueryUtils {
             // For each news in the newsArray, create an {@link News} object
             for (int i = 0; i < newsArray.length(); i++) {
 
-                // Get a single earthquake at position i within the list of earthquakes
+                // Get a single news at position i within the list of news
                 JSONObject currentNews = newsArray.getJSONObject(i);
-
-
 
                 // Extract the value for the key called "title"
                 String title = currentNews.getString("webTitle");
@@ -193,7 +191,7 @@ public class QueryUtils {
             Log.e("QueryUtils", "Problem parsing the earthquake JSON results", e);
         }
 
-        // Return the list of earthquakes
+        // Return the list of news
         return news;
     }
 }

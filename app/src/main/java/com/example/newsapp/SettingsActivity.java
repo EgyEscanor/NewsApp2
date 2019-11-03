@@ -10,16 +10,11 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-public class SettingsActivity extends AppCompatActivity implements Preference.OnPreferenceChangeListener {
+public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-    }
-
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-        return false;
     }
 
 
@@ -41,7 +36,10 @@ public class SettingsActivity extends AppCompatActivity implements Preference.On
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
+
         }
+
+
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {

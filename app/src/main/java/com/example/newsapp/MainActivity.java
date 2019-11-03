@@ -3,8 +3,9 @@ package com.example.newsapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,8 +22,6 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +31,8 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>>, SharedPreferences.OnSharedPreferenceChangeListener {
 
  /** URL for earthquake data from the USGS dataset */
-   private static final String NEWS_REQUEST_URL = "https://content.guardianapis.com/search?";
-   private static final int NEWS_LOADER_ID =1;
+   public static final String NEWS_REQUEST_URL = "https://content.guardianapis.com/search?";
+   public static final int NEWS_LOADER_ID =1;
 
     @BindView(R.id.recyclerView)
     RecyclerView newsListView;
@@ -56,33 +55,46 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     /* Create a new adapter that takes an empty list of news as input
            Adapter for the list of news
         */
-    NewsAdapter mAdapter = new NewsAdapter(mList,mContext);
-    newsListView.setLayoutManager(new LinearLayoutManager(this));
-    newsListView.setAdapter(mAdapter);
+        NewsAdapter mAdapter = new NewsAdapter(mList, mContext);
+        newsListView.setLayoutManager(new LinearLayoutManager(this));
+        newsListView.setAdapter(mAdapter);
 
-    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-    NewsAsyncTask task = new NewsAsyncTask();
-    task.execute(NEWS_REQUEST_URL);
+        ConnectivityManager cm = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null) {
+            // connected to the internet
+            LoaderManager loaderManager = getSupportLoaderManager();
+            getSupportLoaderManager().initLoader(1, null, this);
+
+        } else {
+            // not connected to the internet
+            loadingIndicator.setVisibility(View.GONE);
+            mEmptyStateTextView.setText(R.string.no_internet);
+        }
 
 
+        // Overriding the onClick and onLongClick methods from RecyclerTouchListener
+        newsListView.addOnItemTouchListener(new Recycler(getApplication(), newsListView, new Recycler.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                News news = mList.get(position);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(news.getmUrl()));
+                startActivity(intent);
+            }
 
-     // Overriding the onClick and onLongClick methods from RecyclerTouchListener
-     newsListView.addOnItemTouchListener(new Recycler(getApplication(), newsListView, new Recycler.ClickListener() {
-      @Override
-      public void onClick(View view, int position) {
-       News news = mList.get(position);
-       Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(news.getmUrl()));
-       startActivity(browserIntent);
-      }
 
-      @Override
-      public void onLongClick(View view, int position) {
+            @Override
+            public void onLongClick(View view, int position) {
 
-      }
-     }));
+            }
+        }));
     }
+
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -91,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             mList.clear();
             mEmptyStateTextView.setVisibility(View.GONE);
             loadingIndicator.setVisibility(View.VISIBLE);
+
+            getSupportLoaderManager().restartLoader(NEWS_LOADER_ID,null,this);
 
         }
 
@@ -107,7 +121,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         );
         String section = sharedPrefer.getString(
                 getString(R.string.section_key),
-                ""
+                getString(R.string.default_section_value)
+
         );
 
         Uri baseUri = Uri.parse(NEWS_REQUEST_URL);
@@ -120,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (!section.equals("")){
             uriBuilder.appendQueryParameter("section",section);
         }
-
         return new NewsLoader(this,uriBuilder.toString());
     }
 
@@ -141,12 +155,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(@NonNull Loader<List<News>> loader) {
-
-
     }
 
     @Override
+    // This method initialize the contents of the Activity's options menu.
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the Options Menu we specified in XML
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -156,26 +170,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         int id = item.getItemId();
         if (id == R.id.action_seetings){
             Intent settingsIntent = new Intent(this,SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private class NewsAsyncTask extends AsyncTask<String,Void,List<News>>{
-
-        @Override
-        protected List<News> doInBackground(String... urls) {
-            if (urls.length < 1 || urls[0] == null) {
-                return null;
-            }
-            List<News> result = null;
-            try {
-                result = QueryUtils.fetchNewsData(urls[0]);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-    }
 }

@@ -20,7 +20,7 @@ public class NewsLoader extends AsyncTaskLoader<List<News>> {
 
     @Override
     protected void onStartLoading() {
-        super.onStartLoading();
+        forceLoad();
     }
 
     @Nullable
@@ -37,6 +37,6 @@ public class NewsLoader extends AsyncTaskLoader<List<News>> {
             e.printStackTrace();
         }
 
-        return null;
+        return news;
     }
 }
